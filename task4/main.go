@@ -11,46 +11,50 @@ import (
 
 type Data struct {
 	data int
-	b    bool
 }
 
-func worker(c chan *Data, n int) {
+func worker(c chan *Data, n int, Exit chan int) {
 	for {
-		t, open := <-c
-		if !open {
+		select {
+		case data := <-c:
+			fmt.Printf("Woker%d  %d\n", n, data.data)
+		case <-Exit:
 			fmt.Printf("Woker%d  closed\n", n)
-			break
+			return
 		}
-		fmt.Printf("Woker%d  %d\n", n, t.data)
 	}
 
 }
-func close1(c chan *Data) {
+func close1(Exit chan int, n int) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
 	fmt.Println("exiting")
-	t := <-c
-	t.b = false
-	close(c)
-
+	for i := 0; i < n+1; i++ {
+		Exit <- 0
+	}
 }
+
 func main() {
 	c := make(chan *Data)
-	dat := Data{1, true}
-
+	dat := Data{1}
+	Exit := make(chan int)
 	var n int = 8
-	go close1(c)
+	go close1(Exit, n)
 	for i := 0; i < n; i++ {
-		go worker(c, i)
+		go worker(c, i, Exit)
 	}
 	for {
 		time.Sleep(time.Second)
-		if !dat.b {
-			break
-		}
 		dat.data = rand.Intn(10)
-		c <- &dat
+		select {
+		case c <- &dat:
+		case <-Exit:
+			time.Sleep(time.Millisecond)
+			fmt.Printf("Main closed\n")
+			return
+		}
+
 	}
 
 }
