@@ -11,5 +11,8 @@ func main() {
 	b = b - a
 	b = -b
 	a = a - b
-	fmt.Printf("a = %v, b = %v", a, b)
+	fmt.Printf("Первый способ\na = %v, b = %v\n", a, b)
+	//Или можно воспользоваться этой конструкцией
+	a, b = b, a
+	fmt.Printf("Второй способ\na = %v, b = %v", a, b)
 }
