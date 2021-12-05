@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	//Создаем мапу массивов
 	mp := make(map[int][]float32)
 	mass := [...]float32{-25.4, -27.0, 13.0, 19.0, 15.5, 24.5, -21.0, 32.5}
 	min := mass[0]
@@ -21,6 +22,8 @@ func main() {
 	h := math.Abs(float64(max-min)) / 10
 	for _, val := range mass {
 		for j := 0; j < int(math.Ceil(h)); j++ {
+			//Проверяется принадлежность текцщей тепературы определенному интервалу, зависящему от j.
+			//Каждый интервал соответствует определенному значению j, который еще и является ключом в мапе
 			if val < (min+10+float32(10*j)) && val >= (min+float32(10*j)) {
 				mp[j] = append(mp[j], val)
 				break
