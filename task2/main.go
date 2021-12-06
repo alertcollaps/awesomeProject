@@ -2,19 +2,24 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
-func write(c chan int, val int) {
+func write(c chan int, val int, wt *sync.WaitGroup) {
 	c <- val
+	defer wt.Done()
 }
 
 func main() {
-	var c chan int = make(chan int)
+	var c = make(chan int)
 	var mass = []int{2, 4, 6, 8, 10}
+	wt := sync.WaitGroup{}
+	wt.Add(len(mass))
 	go func() {
 		for _, val := range mass {
-			write(c, val)
+			go write(c, val, &wt)
 		}
+		wt.Wait()
 		close(c)
 	}()
 	for {
